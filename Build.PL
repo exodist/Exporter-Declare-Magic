@@ -4,7 +4,7 @@ use warnings;
 use Module::Build;
 
 my $build = Module::Build->new(
-    module_name => 'Exporter::Declare',
+    module_name => 'Exporter::Declare::Magic',
     license     => 'perl',
     dist_author => 'Chad Granum <exodist7@gmail.com>',
     create_readme => 1,
@@ -14,6 +14,8 @@ my $build = Module::Build->new(
         'Scalar::Util'  => 0,
         'aliased'       => 0,
         'Meta::Builder' => '0.003',
+        'Exporter::Declare' => '0.107',
+        'Devel::Declare::Parser' => '0.017',
     },
     build_requires => {
         'Test::Simple'    => 0.88,
@@ -22,9 +24,8 @@ my $build = Module::Build->new(
     },
     meta_merge => {
         resources => {
-            repository  => 'http://github.com/exodist/Exporter-Declare',
-            bugtracker  => 'http://github.com/exodist/Exporter-Declare/issues',
-            homepage    => 'http://open-exodus.net/projects/Exporter-Declare',
+            repository  => 'http://github.com/exodist/Exporter-Declare-Magic',
+            bugtracker  => 'http://github.com/exodist/Exporter-Declare-Magic/issues',
         },
     }
 );

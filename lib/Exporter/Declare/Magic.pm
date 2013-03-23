@@ -2,6 +2,8 @@ package Exporter::Declare::Magic;
 use strict;
 use warnings;
 
+our $VERSION = '0.107';
+
 use Devel::Declare::Parser;
 use aliased 'Exporter::Declare::Magic::Sub';
 use aliased 'Exporter::Declare::Export::Generator';
@@ -11,7 +13,7 @@ our @CARP_NOT = qw/
     Exporter::Declare::Specs
     Exporter::Declare::Meta
     Exporter::Declare::Magic
-/;
+    /;
 
 BEGIN {
     die "Devel::Declare::Parser version >= 0.017 is required for -magic\n"
@@ -20,28 +22,34 @@ BEGIN {
 
 use Devel::Declare::Parser::Sublike;
 
+use base 'Exporter::Declare';
 use Exporter::Declare
     'default_exports',
-    export             => { -as => 'ed_export' },
-    gen_export         => { -as => 'ed_gen_export' },
-    default_export     => { -as => 'ed_default_export' },
-    gen_default_export => { -as => 'ed_gen_default_export' };
+    'reexport',
+    export             => {-as => 'ed_export'},
+    gen_export         => {-as => 'ed_gen_export'},
+    default_export     => {-as => 'ed_default_export'},
+    gen_default_export => {-as => 'ed_gen_default_export'};
 
 default_exports qw/
     parsed_exports
     parsed_default_exports
-/;
+    /;
 
 parsed_default_exports( sublike => qw/parser/ );
 
-parsed_default_exports( export => qw/
-    export
-    gen_export
-    default_export
-    gen_default_export
-/);
+parsed_default_exports(
+    export => qw/
+        export
+        gen_export
+        default_export
+        gen_default_export
+        /
+);
 
-Exporter::Declare::Meta->add_hash_metric( 'parsers' );
+Exporter::Declare::Meta->add_hash_metric('parsers');
+
+reexport('Exporter::Declare');
 
 sub export {
     my $class = Exporter::Declare::_find_export_class( \@_ );
@@ -55,41 +63,41 @@ sub gen_export {
 
 sub default_export {
     my $class = Exporter::Declare::_find_export_class( \@_ );
-    my $meta = $class->export_meta;
-    $meta->export_tags_push( 'default', _export( $class, undef, @_ ));
+    my $meta  = $class->export_meta;
+    $meta->export_tags_push( 'default', _export( $class, undef, @_ ) );
 }
 
 sub gen_default_export {
     my $class = Exporter::Declare::_find_export_class( \@_ );
-    my $meta = $class->export_meta;
-    $meta->export_tags_push( 'default', _export( $class, Generator(), @_ ));
+    my $meta  = $class->export_meta;
+    $meta->export_tags_push( 'default', _export( $class, Generator(), @_ ) );
 }
 
 sub _export {
-    my %params = Exporter::Declare::_parse_export_params( @_ );
-    my ($parser) = @{ $params{args} };
-    if ( $parser ) {
+    my %params = Exporter::Declare::_parse_export_params(@_);
+    my ($parser) = @{$params{args}};
+    if ($parser) {
         my $ec = $params{export_class};
         if ( $ec && $ec eq Generator ) {
-            $params{extra_exporter_props} = { parser => $parser, type => Sub };
+            $params{extra_exporter_props} = {parser => $parser, type => Sub};
         }
         else {
             $params{export_class} = Sub;
-            $params{extra_exporter_props} = { parser => $parser };
+            $params{extra_exporter_props} = {parser => $parser};
         }
     }
-    Exporter::Declare::_add_export( %params );
+    Exporter::Declare::_add_export(%params);
 }
 
 sub parser {
     my $class = Exporter::Declare::_find_export_class( \@_ );
-    my $name = shift;
-    my $code = pop;
+    my $name  = shift;
+    my $code  = pop;
     croak "You must provide a name to parser()"
         if !$name || ref $name;
     croak "Too many parameters passed to parser()"
         if @_ && defined $_[0];
-    $code ||= $class->can( $name );
+    $code ||= $class->can($name);
     croak "Could not find code for parser '$name'"
         unless $code;
 
@@ -108,7 +116,7 @@ sub parsed_default_exports {
     my ( $parser, @names ) = @_;
     croak "no parser specified" unless $parser;
 
-    for my $name ( @names ) {
+    for my $name (@names) {
         _export( $class, Sub(), $name, $parser );
         $class->export_meta->export_tags_push( 'default', $name );
     }
@@ -127,9 +135,9 @@ Exporter::Declare::Magic - Enhance Exporter::Declare with some fancy magic.
 =head1 SYNOPSIS
 
     package Some::Exporter;
-    use Exporter::Declare '-magic';
+    use Exporter::Declare::Magic;
 
-    ... #Same as the basic exporter synopsis
+    ... #Same as the basic Exporter::Declare synopsis
 
     #Quoting is not necessary unless you have space or special characters
     export another_sub;
